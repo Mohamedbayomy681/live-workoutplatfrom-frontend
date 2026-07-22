@@ -1,10 +1,18 @@
 
-const API_BASE_URL = 'http://localhost:3000/api';
+const BACKEND_URL =
+  'https://live-workoutplatform-backend-production.up.railway.app';
+
+const API_BASE_URL = `${BACKEND_URL}/api`;
 
 class API {
-
   static async _handleResponse(response) {
-    const result = await response.json();
+    let result;
+
+    try {
+      result = await response.json();
+    } catch {
+      result = {};
+    }
 
     if (!response.ok) {
       if (response.status === 401) {
@@ -12,6 +20,7 @@ class API {
         window.location.href = 'index.html';
         throw new Error('Session expired. Redirecting to login.');
       }
+
       throw new Error(result.message || 'Request failed');
     }
 
@@ -19,116 +28,111 @@ class API {
   }
 
   // AUTH
-static async register(data) {
-  return this.post('/auth/register', data);
-}
 
-static async login(email, password) {
-  return this.post('/auth/login', { email, password });
-}
-
-static async logout() {
-  try {
-    const response = await fetch(`${API_BASE_URL}/auth/logout`, {
-      method: 'POST',
-      credentials: 'include',
-      headers: auth.getAuthHeader()
-    });
-
-    return response.json();
-  } catch (error) {
-    console.error('Logout API error:', error);
+  static async register(data) {
+    return this.post('/auth/register', data);
   }
-}
-// POST request helper
-static async post(endpoint, data) {
-  try {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      method: 'POST',
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(data)
-    });
 
-    return this._handleResponse(response);
-
-  } catch (error) {
-    console.error('API Error:', error);
-    throw error;
+  static async login(email, password) {
+    return this.post('/auth/login', { email, password });
   }
-}
 
-// GET request helper
-static async get(endpoint) {
-  try {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      method: 'GET',
-      credentials: 'include',
-      headers: auth.getAuthHeader()
-    });
+  static async logout() {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/logout`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: auth.getAuthHeader()
+      });
 
-    return this._handleResponse(response);
-
-  } catch (error) {
-    console.error('API Error:', error);
-    throw error;
+      return this._handleResponse(response);
+    } catch (error) {
+      console.error('Logout API error:', error);
+      throw error;
+    }
   }
-}
 
-// PUT request helper
-static async put(endpoint, data) {
-  try {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      method: 'PUT',
-      credentials: 'include',
-      headers: auth.getAuthHeader(),
-      body: JSON.stringify(data)
-    });
+  // POST request helper
 
-    return this._handleResponse(response);
+  static async post(endpoint, data) {
+    try {
+      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      });
 
-  } catch (error) {
-    console.error('API Error:', error);
-    throw error;
+      return this._handleResponse(response);
+    } catch (error) {
+      console.error('API Error:', error);
+      throw error;
+    }
   }
-}
 
-// DELETE request helper
-static async delete(endpoint) {
-  try {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      method: 'DELETE',
-      credentials: 'include',
-      headers: auth.getAuthHeader()
-    });
+  // GET request helper
 
-    return this._handleResponse(response);
+  static async get(endpoint) {
+    try {
+      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: auth.getAuthHeader()
+      });
 
-  } catch (error) {
-    console.error('API Error:', error);
-    throw error;
+      return this._handleResponse(response);
+    } catch (error) {
+      console.error('API Error:', error);
+      throw error;
+    }
   }
-}
 
- static async logout() {
-  try {
-    const response = await fetch(`${API_BASE_URL}/auth/logout`, {
-      method: 'POST',
-      credentials: 'include',
-      headers: auth.getAuthHeader()
-    });
-    return response.json();
-  } catch (error) {
-    console.error('Logout API error:', error);
+  // PUT request helper
+
+  static async put(endpoint, data) {
+    try {
+      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+        method: 'PUT',
+        credentials: 'include',
+        headers: {
+          ...auth.getAuthHeader(),
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      });
+
+      return this._handleResponse(response);
+    } catch (error) {
+      console.error('API Error:', error);
+      throw error;
+    }
   }
-}
-  // TRAINERS 
+
+  // DELETE request helper
+
+  static async delete(endpoint) {
+    try {
+      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+        method: 'DELETE',
+        credentials: 'include',
+        headers: auth.getAuthHeader()
+      });
+
+      return this._handleResponse(response);
+    } catch (error) {
+      console.error('API Error:', error);
+      throw error;
+    }
+  }
+
+  // TRAINERS
 
   static async getTrainers() {
-  return this.get('/trainers/gettrainers');
-}
+    return this.get('/trainers/gettrainers');
+  }
+
   static async getTrainerById(trainerId) {
     return this.get(`/trainers/${trainerId}`);
   }
@@ -137,16 +141,17 @@ static async delete(endpoint) {
     return this.get(`/trainers/${trainerId}/plans`);
   }
 
-  // PLANS 
+  // PLANS
 
- static async getAllPlans() {
-  return this.get('/plans/getplans');
-}
+  static async getAllPlans() {
+    return this.get('/plans/getplans');
+  }
+
   static async getPlan(planId) {
     return this.get(`/plans/${planId}`);
   }
 
-  //  CLIENT 
+  // CLIENT
 
   static async getProfile() {
     return this.get('/clients/profile');
@@ -160,9 +165,17 @@ static async delete(endpoint) {
     return this.put('/clients/subscription', { isSubscribed });
   }
 
-  //  HELPERS 
+  // HELPERS
 
   static getTrainerImageUrl(imagePath) {
-    return `${window.location.protocol}//${window.location.hostname}:3000${imagePath}`;
+    if (!imagePath) {
+      return '';
+    }
+
+    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+      return imagePath;
+    }
+
+    return `${BACKEND_URL}${imagePath}`;
   }
 }
